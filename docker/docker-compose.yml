@@ -1,0 +1,25 @@
+version: "3"
+services:
+  jupyterlab:
+
+    build: .
+    image: my-pytorch-img
+    container_name: "my-pytorch"
+
+    command:
+      jupyter-lab --ip 0.0.0.0 --allow-root --LabApp.token=''
+
+    ports:
+      - "7777:8888"
+    volumes:
+      - ..:/work
+
+    environment:
+      - "NVIDIA_VISIBLE_DEVICES=all"
+      - "NVIDIA_DRIVER_CAPABILITIES=all"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities:
+              - gpu

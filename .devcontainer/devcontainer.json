@@ -1,0 +1,6 @@
+{
+	"name": "docker-python",
+	"dockerComposeFile": "../docker/docker-compose.yml",
+	"service": "jupyterlab",
+	"workspaceFolder": "/work"
+}

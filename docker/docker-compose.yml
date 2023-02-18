@@ -4,7 +4,7 @@ services:
 
     build: .
     image: my-pytorch-img
-    container_name: "my-pytorch"
+    container_name: "torch-practice"
 
     command:
       jupyter-lab --ip 0.0.0.0 --allow-root --LabApp.token=''

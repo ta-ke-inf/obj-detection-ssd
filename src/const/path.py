@@ -1,4 +1,7 @@
 from os.path import abspath, dirname, join
 
-SOURCE_ROOT = join(abspath(dirname(__file__)), "..")
-DATA_PATH = join(SOURCE_ROOT, "../downloads/pytorch_advanced/2_objectdetection/data/VOCdevkit/VOC2012/")
+_PROJECT_ROOT = join(abspath(), "../..")
+
+SOURCE_PATH = join(_PROJECT_ROOT, "src")
+DATA_PATH = join(_PROJECT_ROOT, "downloads/pytorch_advanced/2_objectdetection/data/VOCdevkit/VOC2012/")
+UTILES_PATH = join(_PROJECT_ROOT, "downloads/pytorch_advanced/2_objectdetection/utils")

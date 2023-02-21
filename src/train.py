@@ -8,7 +8,7 @@ import numpy as np
 import torch
 import torch.utils.data as data
 
-from const.path import DATA_PATH
+from const.path import DATA_PATH, SOURCE_PATH, UTILES_PATH
 from utils.preprocess.make_path import make_datapath_list
 from utils.preprocess.xml_to_list import Anno_xml2list
 

@@ -15,11 +15,11 @@ def make_datapath_list(rootpath):
     """
 
     # 画像とアノテーションのパスのテンプレート
-    imgpath_templete = os.path.join(rootpath, 'JEGImages', '%s.png')
-    annopath_templete = os.path.join(rootpath, 'Annotetions', '%s.xml')
+    imgpath_templete = os.path.join(rootpath, 'JPEGImages', '%s.jpg')
+    annopath_templete = os.path.join(rootpath, 'Annotations', '%s.xml')
     # train val 用のIDを取得
-    train_id_names = os.path.join(rootpath, 'ImageSets/Main/train.txt')
-    val_id_names = os.path.join(rootpath, 'ImageSets/Main/val.txt')
+    train_id_names = os.path.join(rootpath + 'ImageSets/Main/train.txt')
+    val_id_names = os.path.join(rootpath + 'ImageSets/Main/val.txt')
 
     train_img_list = list()
     train_anno_list = list()

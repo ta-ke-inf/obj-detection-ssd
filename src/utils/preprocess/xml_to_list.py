@@ -61,5 +61,5 @@ class Anno_xml2list(object):
             label_id = self.classes.index(name)
             bndbox.append(label_id)
 
-            ret += bndbox
+            ret += [bndbox]
         return np.array(ret)

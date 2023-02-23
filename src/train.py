@@ -9,6 +9,7 @@ import torch
 import torch.utils.data as data
 
 from const.path import DATA_PATH, SOURCE_PATH, UTILES_PATH
+from utils.collate_fn import od_collate_fn
 from utils.dataset import VOCDataset
 from utils.preprocess.DataTransform import DataTransform
 from utils.preprocess.make_path import make_datapath_list
@@ -27,9 +28,9 @@ if __name__ == "__main__":
     color_mean = (104, 117, 123) # BGR mean
     input_size = 300 # 前処理後を300の正方形にリサイズ
 
-    #=========================#
-    #        Dataset          #
-    #=========================#
+    #============================#
+    #           Dataset          #
+    #============================#
 
     train_dataset = VOCDataset(
         train_img_list,
@@ -47,4 +48,22 @@ if __name__ == "__main__":
         transform_anno=Anno_xml2list(voc_classes)
     )
 
-    print(val_dataset.__getitem__(0))
+    #============================#
+    #        Dataloader          #
+    #============================#
+
+    batch_size = 16
+
+    train_loader = data.DataLoader(
+        train_dataset,
+        batch_size,
+        shuffle=True,
+        collate_fn=od_collate_fn
+        )
+
+    val_loader = data.DataLoader(
+        val_dataset,
+        batch_size,
+        shuffle=False,
+        collate_fn=od_collate_fn
+        )

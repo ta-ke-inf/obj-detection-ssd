@@ -14,7 +14,7 @@ class L2Norm(nn.Module):
         self.eps = 1e-10 # ゼロ除算を防ぐため
 
 
-    def reset_parameter(self):
+    def reset_parameters(self):
         # init.constant_: 定数で初期化
         init.constant_(self.weight, self.scale)
 
@@ -34,3 +34,9 @@ class L2Norm(nn.Module):
         out = weights * x
 
         return out
+
+if __name__ == "__main__":
+    l2_test = L2Norm()
+    x = torch.randn([16, 512, 35, 35])
+    out = l2_test.forward(x)
+    print(out.shape)

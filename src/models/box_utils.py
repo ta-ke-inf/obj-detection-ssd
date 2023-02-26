@@ -21,8 +21,16 @@ def decode(loc, dbox_list) -> torch.Tensor:
 
     return boxes
 
-def nms():
-    pass
+def nm_suppression(boxes, scores, overlap=0.45, top_k=200):
+    """
+    Args:
+        boxes (torch.Tensor): [確信度閾値(0.01)を超えたBBoxの数, 4] -> BBox情報
+        scores (torch.Tensor): [確信度閾値(0.01)を超えたBBoxの数] -> confの情報
+        overlap (float, optional): BBoxの被り度合いの閾値. Defaults to 0.45.
+        top_k (int, optional): _description_. Defaults to 200.
+    """
+
+
 
 
 if __name__ == "__main__":

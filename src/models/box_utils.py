@@ -20,3 +20,10 @@ def decode(loc, dbox_list) -> torch.Tensor:
     boxes[:, 2:] += boxes[:, :2] # (xmax, ymax)
 
     return boxes
+
+def nms():
+    pass
+
+
+if __name__ == "__main__":
+    pass

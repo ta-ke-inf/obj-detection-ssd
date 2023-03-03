@@ -29,7 +29,9 @@ def nm_suppression(boxes, scores, overlap=0.45, top_k=200):
         overlap (float, optional): BBoxの被り度合いの閾値. Defaults to 0.45.
         top_k (int, optional): _description_. Defaults to 200.
     """
-
+    # return のひな型の作成
+    count = 0
+    keep = scores.new(scores.size(0)).zero_().long()
 
 
 

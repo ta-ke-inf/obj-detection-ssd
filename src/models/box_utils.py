@@ -62,6 +62,14 @@ def nm_suppression(boxes, scores, overlap=0.45, top_k=200):
     # 後ろから top_k=200 個のBBox の index を取得
     idx = idx[-top_k:]
 
+    # numel: tensor の要素数. 200
+    while idx.numel() > 0:
+        i = idx[-1]
+
+
+
+
+
 
 
 

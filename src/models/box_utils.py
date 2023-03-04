@@ -21,6 +21,7 @@ def decode(loc, dbox_list) -> torch.Tensor:
 
     return boxes
 
+
 def nm_suppression(boxes, scores, overlap=0.45, top_k=200):
     """
     Args:
@@ -28,11 +29,41 @@ def nm_suppression(boxes, scores, overlap=0.45, top_k=200):
         scores (torch.Tensor): [確信度閾値(0.01)を超えたBBoxの数] -> confの情報
         overlap (float, optional): BBoxの被り度合いの閾値. Defaults to 0.45.
         top_k (int, optional): _description_. Defaults to 200.
+
+    Returns:
+        keep (torch.Tensor):
     """
+
     # return のひな型の作成
     count = 0
     # keep: torch.Size([確信度閾値(0.01)を超えたBBoxの数]). 要素は全て 0
     keep = scores.new(scores.size(0)).zero_().long()
+
+    # 各 BBox の面積 area の計算
+    x1 = boxes[:, 0]
+    y1 = boxes[:, 1]
+    x2 = boxes[:, 2]
+    y2 = boxes[:, 3]
+
+    # torch.mul: 要素同士の積
+    area = torch.mul(x2 - x1, y2 - y1)
+
+    # IOUの計算の際にひな形として使用
+    tmp_x1 = boxes.new()
+    tmp_y1 = boxes.new()
+    tmp_x2 = boxes.new()
+    tmp_y2 = boxes.new()
+    tmp_w = boxes.new()
+    tmp_h = boxes.new()
+
+    # scores を昇順に並び替える
+    v, idx = scores.sort(0)
+
+    # 後ろから top_k=200 個のBBox の index を取得
+    idx = idx[-top_k:]
+
+
+
 
 
 

@@ -31,7 +31,8 @@ def nm_suppression(boxes, scores, overlap=0.45, top_k=200):
         top_k (int, optional): _description_. Defaults to 200.
 
     Returns:
-        keep (torch.Tensor):
+        keep (torch.Tensor): nms を通過した BBox の idx
+        count (int): nms を通過した BBox の数
     """
 
     # return のひな型の作成
@@ -79,6 +80,35 @@ def nm_suppression(boxes, scores, overlap=0.45, top_k=200):
         torch.index_select(x2, 0, idx, out=tmp_x2)
         torch.index_select(y2, 0, idx, out=tmp_y2)
 
+        # 現在の最大の conf (i) と それ以外(idx)の 重なった矩形領域を clamp で計算
+        tmp_x1 = torch.clamp(tmp_x1, min=x1[i])
+        tmp_y1 = torch.clamp(tmp_y1, min=y1[i])
+        tmp_x2 = torch.clamp(tmp_x2, max=x2[i])
+        tmp_y2 = torch.clamp(tmp_y2, max=y2[i])
+
+        # w, h の形も idx に合わせる
+        tmp_w.resize_as_(tmp_x2)
+        tmp_h.resize_as_(tmp_y2)
+
+        tmp_w = tmp_x2 - tmp_x1
+        tmp_h = tmp_y2 - tmp_y1
+
+        # 重なった矩形領域の面積を計算
+        inter = tmp_w * tmp_h
+
+        # IoU の計算
+
+        # idx の面積
+        rem_area = torch.index_select(area, 0, idx)
+        # 二つのエリアの和(OR)
+        union = (rem_area - inter) + area[i]
+        IoU = inter / union # IoU は idx の数分だけの数ある
+
+        # IoU が overlap より小さい idx のみ残す
+        # つまり、同じ物体だと思われるものは統合する
+        idx = idx[IoU.le(overlap)]
+
+    return keep, count
 
 
 if __name__ == "__main__":

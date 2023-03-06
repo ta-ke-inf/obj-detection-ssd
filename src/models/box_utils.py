@@ -38,6 +38,7 @@ def nm_suppression(boxes, scores, overlap=0.45, top_k=200):
     # return のひな型の作成
     count = 0
     # keep: torch.Size([確信度閾値(0.01)を超えたBBoxの数]). 要素は全て 0
+    # nms の出力を格納する
     keep = scores.new(scores.size(0)).zero_().long()
 
     # 各 BBox の面積 area の計算

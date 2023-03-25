@@ -1,5 +1,6 @@
 import torch.nn as nn
 from DBox import DBox
+from Detect import Detect
 from modules import make_extras, make_loc_conf, make_vgg
 
 

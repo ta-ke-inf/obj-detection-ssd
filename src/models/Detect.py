@@ -55,6 +55,19 @@ class Detect(Function):
                 if scores.nelement() == 0:
                     continue
 
+                # c_mask を decoded_boxes に適用できるように次元を複製
+                l_mask = c_mask.upsqueeze(1).expand_as(decoded_boxes) # [8732, 4]
+                boxes = decoded_boxes[l_mask].view(-1, 4) # [閾値を超えたBBoxの数, 4]
+
+                idx, count = nm_suppression(boxes, scores, self.nms_thresh, self.top_k)
+                # torch.cat(([nmsを通過したBBoxの数, 1], [nmsを通過したBBoxの数, 4]), 1) : 結合のために次元の挿入
+                output[i, cl, :count] = torch.cat((scores[idx[:count]].unsqueeze(1), boxes[idx[:count]]), 1)
+
+        return output # [batch_num, 21, 200, 5]
+
+
+
+
 
 if __name__ == "__main__":
     pass

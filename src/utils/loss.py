@@ -66,16 +66,30 @@ class MultiBoxLoss(nn.Module):
         # loss_c の計算
         #=============
 
+        # Hard Negative Mask を適用した Negative DBox におけるマスクを作成-----------------------------------------------
+
         # [num_batch, 8732, 21] -> batch_conf: [num_batch*8732, 21]
         batch_conf = conf_data.view(-1, num_classes)
         # 各ミニバッチの8732個の各DBoxに対して損失を計算
         loss_c = F.cross_entropy(batch_conf, conf_t_label.view(-1), reduction='none') # loss_c: [num_batch*8732]
 
-        # ここから Hard Negative Minig --------------------------------------------
-
         # Positive DBox の数
-        # num_mask: [num_batch, 1]
+        # num_pos: [num_batch, 1]
         num_pos = pos_mask.long().sum(1, keepdim=True) # .long(): Bool to int64
-        loss_c = loss_c.view(num_batch, -1) # [num_batch*8732] -> [num_batch, 8732]
 
-        loss_c = loss_c[pos_mask]
+        loss_c = loss_c.view(num_batch, -1) # [num_batch*8732] -> [num_batch, 8732]
+        loss_c[pos_mask] = 0 # Positive BBox の損失は 0 にする
+
+        # idx_rank: loss_c を降順にすると何番目になるかという情報
+        _, loss_idx = loss_c.sort(1, descending=True) # 降順 [num_batch, 8732]
+        _, idx_rank = loss_idx.sort(1) # 昇順 [num_batch, 8732]
+
+        # Hard Negative Mining を適用した Negative DBox の数
+        # Negative DBox の数 = Positive DBox の数 * 3 としている
+        # ただし、DBox の数 8732 個を超えないように clamp する
+        num_neg = torch.clamp(num_pos * self.neg_pos, max=num_dbox)
+
+        # loss_c を降順にした時の順番が num_neg より小さければ(つまり、損失値が大きいDBboxであれば)取得する
+        neg_mask = idx_rank < (num_neg).expand_as(idx_rank) # [num_batch, 8732]
+
+        #----------------------------------------------------------------------------------------------------------

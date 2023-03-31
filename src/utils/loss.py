@@ -45,9 +45,9 @@ class MultiBoxLoss(nn.Module):
             # conf_t_label : [num_batch, 8732]
             match(self.jaccard_thresh, truths, dbox, variance, labels, loc_t, conf_t_label, idx)
 
-        #===========
+        #=============
         # loss_l の計算
-        #===========
+        #=============
 
         # Positive DBox のマスクを取得
         pos_mask = conf_t_label > 0 # [num_batch, 8732]
@@ -59,3 +59,22 @@ class MultiBoxLoss(nn.Module):
 
         # Positive DBox に対する損失を計算
         loss_l = F.smooth_l1_loss(loc_p, loc_t, reduction='sum')
+
+
+        #=============
+        # loss_c の計算
+        #=============
+
+        # [num_batch, 8732, 21] -> batch_conf: [num_batch*8732, 21]
+        batch_conf = conf_data.view(-1, num_classes)
+        # 各ミニバッチの8732個の各DBoxに対して損失を計算
+        loss_c = F.cross_entropy(batch_conf, conf_t_label.view(-1), reduction='none') # loss_c: [num_batch*8732]
+
+        # ここから Hard Negative Minig --------------------------------------------
+
+        # Positive DBox の数
+        # num_mask: [num_batch, 1]
+        num_pos = pos_mask.long().sum(1, keepdim=True) # .long(): Bool to int64
+        loss_c = loss_c.view(num_batch, -1) # [num_batch*8732] -> [num_batch, 8732]
+
+        loss_c = loss_c[pos_mask]

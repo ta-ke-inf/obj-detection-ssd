@@ -93,3 +93,20 @@ class MultiBoxLoss(nn.Module):
         neg_mask = idx_rank < (num_neg).expand_as(idx_rank) # [num_batch, 8732]
 
         #----------------------------------------------------------------------------------------------------------
+
+        pos_idx_mask = pos_mask.unsqueeze(2).expand_as(conf_data) # [num_batch, 8732] -> [num_batch, 8732, 21]
+        neg_idx_mask = neg_mask.unsqueeze(2).expand_as(conf_data) # [num_batch, 8732] -> [num_batch, 8732, 21]
+
+        # conf_p : [Positive DBox + Hard Negative Mining を適用したDBoxの数(全ミニバッチの合計), 21]
+        # conf_t : [Positive DBox + Hard Negative Mining を適用したDBoxの数(全ミニバッチの合計)]
+        conf_p = conf_data[(pos_idx_mask + neg_idx_mask).gt(0)].view(-1, num_classes)
+        conf_t = conf_t_label[(pos_mask+neg_mask).gt(0)]
+
+        loss_c = F.cross_entropy(conf_p, conf_t, reduction='sum')
+
+        # 全ミニバッチにおいての Positive DBox の合計で割り算
+        N = num_pos.sum()
+        loss_l /= N
+        loss_c /= N
+
+        return loss_l, loss_c

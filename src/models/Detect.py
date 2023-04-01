@@ -2,8 +2,9 @@
 
 import torch
 import torch.nn as nn
-from box_utils import decode, nm_suppression
 from torch.autograd import Function
+
+from models.box_utils import decode, nm_suppression
 
 
 class Detect(Function):

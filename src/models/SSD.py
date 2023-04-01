@@ -1,10 +1,11 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from DBox import DBox
-from Detect import Detect
-from L2Norm import L2Norm
-from modules import make_extras, make_loc_conf, make_vgg
+
+from models.DBox import DBox
+from models.Detect import Detect
+from models.L2Norm import L2Norm
+from models.modules import make_extras, make_loc_conf, make_vgg
 
 
 class SSD(nn.Module):

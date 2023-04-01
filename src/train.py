@@ -9,6 +9,7 @@ import torch
 import torch.utils.data as data
 
 from const.path import DATA_PATH, SOURCE_PATH, UTILES_PATH
+from models.SSD import SSD
 from utils.collate_fn import od_collate_fn
 from utils.dataset import VOCDataset
 from utils.preprocess.DataTransform import DataTransform
@@ -67,3 +68,28 @@ if __name__ == "__main__":
         shuffle=False,
         collate_fn=od_collate_fn
         )
+
+
+    dataloader_dict = {"train": train_loader, "val": val_loader}
+
+    ssd_cfg = {
+    # クラスの数
+    'num_classes': 21,
+    # 入力画像のサイズ
+    'input_size': 300,
+    # source 毎の出力する BBox の数
+    'bbox_aspect_num': [4, 6, 6, 6, 4, 4],
+    # 特徴量の画像サイズ
+    'feature_maps': [38, 19, 10, 5, 3, 1],
+    # DBox のサイズ
+    'steps': [8, 16, 32, 64, 100, 300],
+    # 小さいDBox のサイズ
+    'min_sizes': [20, 60, 111, 162, 213, 264],
+    # 大きいDBox のサイズ
+    'max_sizes': [60, 111, 162, 213, 264, 315],
+    # アスペクト比
+    'aspect_ratios': [[2], [2,3], [2,3], [2,3], [2], [2]]
+    }
+
+    net = SSD(phase="train", cfg=ssd_cfg)
+    print(net)

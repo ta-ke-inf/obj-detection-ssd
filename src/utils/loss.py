@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from match import match
 
 
 class MultiBoxLoss(nn.Module):
@@ -44,7 +45,7 @@ class MultiBoxLoss(nn.Module):
             # loc_t と conf_t_label が上書きされる
             # loc_t : [num_batch, 8732, 4]
             # conf_t_label : [num_batch, 8732]
-            match(self.jaccard_thresh, truths, dbox, variance, labels, loc_t, conf_t_label, idx)
+            match(self.jaccard_thresh, truths, dbox_list, variance, labels, loc_t, conf_t_label, idx)
 
         #=============
         # loss_l の計算

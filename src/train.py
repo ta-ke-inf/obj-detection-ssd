@@ -70,7 +70,6 @@ class Trainer:
             targets: List[torch.Tensor],
     ) -> Tuple[torch.Tensor, torch.Tensor]:
         """
-
         Args:
             images (torch.Tensor): images each epoch, [num_batch, 3, 300, 300]
             targets (List[torch.Tensor]): targets each epoch, List[num_batch, torch.Size([num_objs, 5])]
@@ -87,7 +86,15 @@ class Trainer:
 
     def fit(
             self, train_loader: data.DataLoader, val_loader: data.DataLoader
-    ) -> None:
+    ) -> Tuple[List[float], List[float]]:
+        """
+        Args:
+            train_loader (data.DataLoader): train dataloader
+            val_loader (data.DataLoader): val dataloader
+
+        Returns:
+            Tuple[List[float], List[float]]: [train loss per epoch, val loss per epoch]
+        """
         # train
         train_losses: List[float] = []
 
@@ -99,7 +106,24 @@ class Trainer:
             images = images.to("cpu")
             targets = targets.to("cpu")
 
+            print(f"train loss: {loss.item()} \n")
+            train_losses.append(loss.item())
 
+        # val
+        val_losses: List[float] = []
+
+        for images, targets in val_loader:
+            images = images.to(self.device)
+            targets = targets.to(self.device)
+            loss, _ = self.val_step(images, targets)
+
+            images = images.to("cpu")
+            targets = targets.to("cpu")
+
+            print(f"val loss: {loss.item()} \n")
+            val_losses.append(loss.item())
+
+        return train_losses, val_losses
 
 
 if __name__ == "__main__":

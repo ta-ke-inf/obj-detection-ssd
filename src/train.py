@@ -1,10 +1,5 @@
-import os
-import random
-import xml.etree.ElementTree as ET
+from typing import List, Tuple
 
-import cv2
-import matplotlib.pyplot as plt
-import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -27,6 +22,38 @@ def weight_init(m):
         if m.bias is not None:
             nn.init.constant_(m.bias, 0.0)
 
+
+class Trainer:
+
+    def __init__(
+        self,
+        net: nn.Module,
+        optimizer: optim.Optimizer,
+        criterion: nn.Module,
+        device: torch.device
+    ) -> None:
+        self.net = net
+        self.optimizer = optimizer
+        self.criterion = criterion
+        self.device = device
+
+
+    def train_step(
+            self,
+            images: torch.Tensor,
+            targets: List[torch.Tensor],
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
+        """
+
+        Args:
+            images (torch.Tensor): images each epoch, [num_batch, 3, 300, 300]
+            targets (torch.Tensor): targets each epoch, [num_bbox, 5]
+
+        Returns:
+            Tuple[torch.Tensor, torch.Tensor]: [loss, output]
+        """
+        outputs = self.net(images)
+
 if __name__ == "__main__":
 
     train_img_list, train_anno_list, val_img_list, val_anno_list = make_datapath_list(DATA_PATH)
@@ -40,10 +67,9 @@ if __name__ == "__main__":
     color_mean = (104, 117, 123) # BGR mean
     input_size = 300 # 前処理後を300の正方形にリサイズ
 
-    #============================#
-    #           Dataset          #
-    #============================#
-
+    """
+    define Dataset
+    """
     train_dataset = VOCDataset(
         train_img_list,
         train_anno_list,
@@ -59,11 +85,9 @@ if __name__ == "__main__":
         transform=DataTransform(input_size, color_mean),
         transform_anno=Anno_xml2list(voc_classes)
     )
-
-    #============================#
-    #        Dataloader          #
-    #============================#
-
+    """
+    define Dataloader
+    """
     batch_size = 16
 
     train_loader = data.DataLoader(
@@ -118,6 +142,5 @@ if __name__ == "__main__":
 
     # 損失関数
     criterion = MultiBoxLoss(jaccard_thresh=0.5, neg_pos=3, device=device)
-
     # 最適化
     optimizer = optim.SGD(net.parameters(), lr=1e-3, momentum=0.9, weight_decay=5e-4)

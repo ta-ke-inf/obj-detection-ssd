@@ -6,15 +6,26 @@ import cv2
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
+import torch.nn as nn
+import torch.optim as optim
 import torch.utils.data as data
 
 from const.path import DATA_PATH, SOURCE_PATH, UTILES_PATH
 from models.SSD import SSD
 from utils.collate_fn import od_collate_fn
 from utils.dataset import VOCDataset
+from utils.loss import MultiBoxLoss
 from utils.preprocess.DataTransform import DataTransform
 from utils.preprocess.make_path import make_datapath_list
 from utils.preprocess.xml_to_list import Anno_xml2list
+
+
+# He の初期化(正規分布)
+def weight_init(m):
+    if isinstance(m, nn.Conv2d):
+        nn.init.kaiming_normal_(m.weight.data)
+        if m.bias is not None:
+            nn.init.constant_(m.bias, 0.0)
 
 if __name__ == "__main__":
 
@@ -93,3 +104,20 @@ if __name__ == "__main__":
 
     net = SSD(phase="train", cfg=ssd_cfg)
     print(net)
+
+    # 重みの初期化
+    vgg_weights = torch.load('./weights/vgg16_reducedfc.pth')
+    net.vgg.load_state_dict(vgg_weights)
+
+    net.extras.apply(weight_init)
+    net.loc.apply(weight_init)
+    net.conf.apply(weight_init)
+
+    device = torch.device("cuda:0" if torch.cuda.is_available else "cpu")
+    print("Your device: ", device)
+
+    # 損失関数
+    criterion = MultiBoxLoss(jaccard_thresh=0.5, neg_pos=3, device=device)
+
+    # 最適化
+    optimizer = optim.SGD(net.parameters(), lr=1e-3, momentum=0.9, weight_decay=5e-4)

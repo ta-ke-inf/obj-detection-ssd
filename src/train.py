@@ -1,3 +1,4 @@
+import os
 from typing import List, Tuple
 
 import torch
@@ -5,7 +6,7 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.utils.data as data
 
-from const.path import DATA_PATH, SOURCE_PATH, UTILES_PATH
+from const.path import DATA_PATH, SAVE_PATH
 from models.SSD import SSD
 from utils.collate_fn import od_collate_fn
 from utils.dataset import VOCDataset
@@ -177,7 +178,6 @@ if __name__ == "__main__":
         )
 
 
-    dataloader_dict = {"train": train_loader, "val": val_loader}
 
     ssd_cfg = {
     'num_classes': 21,
@@ -208,3 +208,18 @@ if __name__ == "__main__":
     criterion = MultiBoxLoss(jaccard_thresh=0.5, neg_pos=3, device=device)
     # 最適化
     optimizer = optim.SGD(net.parameters(), lr=1e-3, momentum=0.9, weight_decay=5e-4)
+
+    trainer = Trainer(net, optimizer, criterion, device)
+
+    train_losses :List[float] = []
+    val_losses :List[float] = []
+
+    num_epochs = 10
+    for i in range(num_epochs + 1):
+        print(f"Epoch {i+1}/{num_epochs}")
+
+        train_losses_per_epoch, val_losses_per_epoch = trainer.fit(train_loader, val_loader)
+        train_losses.append(train_losses_per_epoch)
+        val_losses.append(val_losses_per_epoch)
+
+        torch.save(trainer.net, os.path.join(SAVE_PATH, f"epoch_{i+1}.pt"))

@@ -1,7 +1,8 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from match import match
+
+from utils.match import match
 
 
 class MultiBoxLoss(nn.Module):
@@ -15,7 +16,7 @@ class MultiBoxLoss(nn.Module):
         """
         Args:
             predictions (tuple): SSDの出力 (loc:[num_batch, 8732, 4]), (conf:[num_batch, 8732, 21]), (dbox_list:[8732, 4])
-            targets (torch.Tensor): 正解 [num_batch, num_objs, 5]  [xmin, ymin, xmax, ymax, label_ind]
+            targets (List[torch.Tensor]): 正解 List[num_batch, torch.Size([num_objs, 5])],  [xmin, ymin, xmax, ymax, label_ind]
 
         Returns:
             loss_l: loc の損失

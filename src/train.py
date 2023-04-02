@@ -15,7 +15,7 @@ from utils.preprocess.make_path import make_datapath_list
 from utils.preprocess.xml_to_list import Anno_xml2list
 
 
-# He の初期化(正規分布)
+# initialize He weights
 def weight_init(m):
     if isinstance(m, nn.Conv2d):
         nn.init.kaiming_normal_(m.weight.data)
@@ -47,12 +47,60 @@ class Trainer:
 
         Args:
             images (torch.Tensor): images each epoch, [num_batch, 3, 300, 300]
-            targets (torch.Tensor): targets each epoch, [num_bbox, 5]
+            targets (List[torch.Tensor]): targets each epoch, List[num_batch, torch.Size([num_objs, 5])]
 
         Returns:
             Tuple[torch.Tensor, torch.Tensor]: [loss, output]
         """
+        self.net.train()
         outputs = self.net(images)
+        loss_l, loss_c = self.criterion(outputs, targets)
+        loss = loss_l + loss_c
+
+        self.optimizer.zero_grad()
+        loss.backward()
+        self.optimizer.step()
+
+        return loss, outputs
+
+
+    def val_step(
+            self,
+            images: torch.Tensor,
+            targets: List[torch.Tensor],
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
+        """
+
+        Args:
+            images (torch.Tensor): images each epoch, [num_batch, 3, 300, 300]
+            targets (List[torch.Tensor]): targets each epoch, List[num_batch, torch.Size([num_objs, 5])]
+
+        Returns:
+            Tuple[torch.Tensor, torch.Tensor]: [loss, output]
+        """
+        self.net.train()
+        outputs = self.net(images)
+        loss_l, loss_c = self.criterion(outputs, targets)
+        loss = loss_l + loss_c
+
+        return loss, outputs
+
+    def fit(
+            self, train_loader: data.DataLoader, val_loader: data.DataLoader
+    ) -> None:
+        # train
+        train_losses: List[float] = []
+
+        for images, targets in train_loader:
+            images = images.to(self.device)
+            targets = [target.to(self.device) for target in targets]
+            loss, _ = self.train_step(images, targets)
+
+            images = images.to("cpu")
+            targets = targets.to("cpu")
+
+
+
 
 if __name__ == "__main__":
 

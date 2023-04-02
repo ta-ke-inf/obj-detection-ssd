@@ -38,15 +38,17 @@ class MultiBoxLoss(nn.Module):
 
         for idx in range(num_batch):
             # 正解 BBox の位置情報
-            truths = targets[idx][:, -1].to(self.device)
+            truths = targets[idx][:, :-1].to(self.device)
             # 正解 BBox のラベル
-            labels = targets[idx][:, :-1].to(self.device)
+            labels = targets[idx][:, -1].to(self.device)
+
+            dbox = dbox_list.to(self.device)
 
             variance = [0.1, 0.2]
             # loc_t と conf_t_label が上書きされる
             # loc_t : [num_batch, 8732, 4]
             # conf_t_label : [num_batch, 8732]
-            match(self.jaccard_thresh, truths, dbox_list, variance, labels, loc_t, conf_t_label, idx)
+            match(self.jaccard_thresh, truths, dbox, variance, labels, loc_t, conf_t_label, idx)
 
         #=============
         # loss_l の計算

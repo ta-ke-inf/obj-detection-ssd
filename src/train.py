@@ -60,6 +60,7 @@ class Trainer:
 
         self.optimizer.zero_grad()
         loss.backward()
+        nn.utils.clip_grad_value_(net.parameters(), clip_value=2.0)
         self.optimizer.step()
 
         return loss, outputs
@@ -104,8 +105,8 @@ class Trainer:
             targets = [target.to(self.device) for target in targets]
             loss, _ = self.train_step(images, targets)
 
-            images = images.to("cpu")
-            targets = targets.to("cpu")
+            #images = images.to("cpu")
+            #targets = targets.to("cpu")
 
             print(f"train loss: {loss.item()} \n")
             train_losses.append(loss.item())
@@ -115,11 +116,11 @@ class Trainer:
 
         for images, targets in val_loader:
             images = images.to(self.device)
-            targets = targets.to(self.device)
+            targets = [target.to(self.device) for target in targets]
             loss, _ = self.val_step(images, targets)
 
-            images = images.to("cpu")
-            targets = targets.to("cpu")
+            #images = images.to("cpu")
+            #targets = targets.to("cpu")
 
             print(f"val loss: {loss.item()} \n")
             val_losses.append(loss.item())
@@ -178,7 +179,9 @@ if __name__ == "__main__":
         )
 
 
-
+    """
+    define Network
+    """
     ssd_cfg = {
     'num_classes': 21,
     'input_size': 300,
@@ -189,11 +192,9 @@ if __name__ == "__main__":
     'max_sizes': [60, 111, 162, 213, 264, 315],
     'aspect_ratios': [[2], [2,3], [2,3], [2,3], [2], [2]]
     }
-
     net = SSD(phase="train", cfg=ssd_cfg)
-    print(net)
 
-    # 重みの初期化
+    # initialize weights
     vgg_weights = torch.load('./weights/vgg16_reducedfc.pth')
     net.vgg.load_state_dict(vgg_weights)
 
@@ -204,11 +205,16 @@ if __name__ == "__main__":
     device = torch.device("cuda:0" if torch.cuda.is_available else "cpu")
     print("Your device: ", device)
 
-    # 損失関数
+    # define loss function
     criterion = MultiBoxLoss(jaccard_thresh=0.5, neg_pos=3, device=device)
-    # 最適化
+    # define optimizer
     optimizer = optim.SGD(net.parameters(), lr=1e-3, momentum=0.9, weight_decay=5e-4)
 
+    """
+    train or val phaze
+    """
+    net.to(device)
+    torch.backends.cudnn.benchmark = True
     trainer = Trainer(net, optimizer, criterion, device)
 
     train_losses :List[float] = []
@@ -216,10 +222,14 @@ if __name__ == "__main__":
 
     num_epochs = 10
     for i in range(num_epochs + 1):
-        print(f"Epoch {i+1}/{num_epochs}")
+        print(f"Epoch {i+1}/{num_epochs} {'-'*20} \n")
 
         train_losses_per_epoch, val_losses_per_epoch = trainer.fit(train_loader, val_loader)
         train_losses.append(train_losses_per_epoch)
         val_losses.append(val_losses_per_epoch)
 
-        torch.save(trainer.net, os.path.join(SAVE_PATH, f"epoch_{i+1}.pt"))
+        print(f"Epoch train loss: {train_losses_per_epoch} \n")
+        print(f"Epoch val loss: {val_losses_per_epoch} \n")
+
+        if((i+1) % 10 ==0):
+            torch.save(trainer.net, os.path.join(SAVE_PATH, f"epoch_{i+1}.pt"))

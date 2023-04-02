@@ -108,21 +108,13 @@ if __name__ == "__main__":
     dataloader_dict = {"train": train_loader, "val": val_loader}
 
     ssd_cfg = {
-    # クラスの数
     'num_classes': 21,
-    # 入力画像のサイズ
     'input_size': 300,
-    # source 毎の出力する BBox の数
     'bbox_aspect_num': [4, 6, 6, 6, 4, 4],
-    # 特徴量の画像サイズ
     'feature_maps': [38, 19, 10, 5, 3, 1],
-    # DBox のサイズ
     'steps': [8, 16, 32, 64, 100, 300],
-    # 小さいDBox のサイズ
     'min_sizes': [20, 60, 111, 162, 213, 264],
-    # 大きいDBox のサイズ
     'max_sizes': [60, 111, 162, 213, 264, 315],
-    # アスペクト比
     'aspect_ratios': [[2], [2,3], [2,3], [2,3], [2], [2]]
     }
 

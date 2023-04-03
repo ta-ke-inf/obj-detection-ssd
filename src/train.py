@@ -234,7 +234,7 @@ if __name__ == "__main__":
         train_losses.append(train_losses_per_epoch)
         val_losses.append(val_losses_per_epoch)
 
-        print(f"Epoch train loss: {epoch_train_loss} \n")
+        print(f"Epoch train loss: {epoch_train_loss}")
         print(f"Epoch val loss: {epoch_val_loss} \n")
 
         if((i+1) % 10 ==0):

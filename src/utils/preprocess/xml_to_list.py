@@ -46,7 +46,7 @@ class Anno_xml2list(object):
             bbox = obj.find('bndbox')
 
             # bbox
-            pts = ['xmin', 'xmax', 'ymin', 'ymax']
+            pts = ['xmin', 'ymin', 'xmax', 'ymax']
             for pt in pts:
                 cur_pixel = int(bbox.find(pt).text) - 1
 

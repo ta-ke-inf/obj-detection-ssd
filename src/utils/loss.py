@@ -59,12 +59,11 @@ class MultiBoxLoss(nn.Module):
         pos_idx = pos_mask.unsqueeze(pos_mask.dim()).expand_as(loc_data) # mask を適用させるために [num_batch, 8732] -> [num_batch, 8732, 4] に変形
 
         # mask を適用すると 1次元に圧縮される仕様なので, view で 次元を増やしている
-        loc_t = loc_t[pos_idx].view(-1, 4) # 教師データ(正解BBoxに対するオフセット) : [物体を検出したBBoxの数(全ミニバッチの合計), 4]
         loc_p = loc_data[pos_idx].view(-1, 4) # 予測データ(予測BBoxに対するオフセット) : [物体を検出したBBoxの数(全ミニバッチの合計), 4]
+        loc_t = loc_t[pos_idx].view(-1, 4) # 教師データ(正解BBoxに対するオフセット) : [物体を検出したBBoxの数(全ミニバッチの合計), 4]
 
         # Positive DBox に対する損失を計算
         loss_l = F.smooth_l1_loss(loc_p, loc_t, reduction='sum')
-
 
         #=============
         # loss_c の計算

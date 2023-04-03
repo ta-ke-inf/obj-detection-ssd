@@ -87,15 +87,16 @@ class Trainer:
         return loss, outputs
 
     def fit(
-            self, train_loader: data.DataLoader, val_loader: data.DataLoader
-    ) -> Tuple[List[float], List[float]]:
+            self, train_loader: data.DataLoader, val_loader: data.DataLoader, iteration: int
+    ) -> Tuple[List[float], List[float], int]:
         """
         Args:
             train_loader (data.DataLoader): train dataloader
             val_loader (data.DataLoader): val dataloader
+            iteration (int): start iteration
 
         Returns:
-            Tuple[List[float], List[float]]: [train loss per epoch, val loss per epoch]
+            Tuple[List[float], List[float], int]: [train loss per epoch, val loss per epoch, end iteration]
         """
         # train
         train_losses: List[float] = []
@@ -108,8 +109,10 @@ class Trainer:
             #images = images.to("cpu")
             #targets = targets.to("cpu")
 
-            print(f"train loss: {loss.item()} \n")
+            if iteration % 10 ==0:
+                print(f"{iteration} iteration, train loss: {loss.item()}")
             train_losses.append(loss.item())
+            iteration += 1
 
         # val
         val_losses: List[float] = []
@@ -121,11 +124,10 @@ class Trainer:
 
             #images = images.to("cpu")
             #targets = targets.to("cpu")
-
-            print(f"val loss: {loss.item()} \n")
             val_losses.append(loss.item())
 
-        return train_losses, val_losses
+
+        return train_losses, val_losses, iteration
 
 
 if __name__ == "__main__":
@@ -162,7 +164,7 @@ if __name__ == "__main__":
     """
     define Dataloader
     """
-    batch_size = 16
+    batch_size = 32
 
     train_loader = data.DataLoader(
         train_dataset,
@@ -219,17 +221,21 @@ if __name__ == "__main__":
 
     train_losses :List[float] = []
     val_losses :List[float] = []
-
+    iteration = 1
     num_epochs = 10
     for i in range(num_epochs + 1):
         print(f"Epoch {i+1}/{num_epochs} {'-'*20} \n")
 
-        train_losses_per_epoch, val_losses_per_epoch = trainer.fit(train_loader, val_loader)
+        train_losses_per_epoch, val_losses_per_epoch, iteration = trainer.fit(train_loader, val_loader, iteration)
+
+        epoch_train_loss = sum(train_losses_per_epoch)
+        epoch_val_loss = sum(val_losses_per_epoch)
+
         train_losses.append(train_losses_per_epoch)
         val_losses.append(val_losses_per_epoch)
 
-        print(f"Epoch train loss: {train_losses_per_epoch} \n")
-        print(f"Epoch val loss: {val_losses_per_epoch} \n")
+        print(f"Epoch train loss: {epoch_train_loss} \n")
+        print(f"Epoch val loss: {epoch_val_loss} \n")
 
         if((i+1) % 10 ==0):
             torch.save(trainer.net, os.path.join(SAVE_PATH, f"epoch_{i+1}.pt"))

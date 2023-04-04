@@ -28,9 +28,9 @@ def test_ssd() -> None:
     num_dbox = 8732
     num_classes = 21
 
-    # loc
+
     assert (
-        output[0].shape,
+        output[0].shape, #
         output[1].shape,
         output[2].shape
         ) == (

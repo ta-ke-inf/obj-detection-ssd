@@ -22,7 +22,8 @@ RUN pip install \
     librosa \
     optuna \
     pandas \
-    seaborn
+    seaborn \
+    pytest
 
 WORKDIR /work
 #CMD ["/bin/bash"]

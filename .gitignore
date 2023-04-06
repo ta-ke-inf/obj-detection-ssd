@@ -130,3 +130,6 @@ dmypy.json
 
 # dataset
 pytorch_advanced/
+
+# pth
+.pth
